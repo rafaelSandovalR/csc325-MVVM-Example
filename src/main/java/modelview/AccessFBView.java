@@ -18,6 +18,7 @@ import com.mycompany.mvvmexample.FirestoreContext;
 import com.mycompany.mvvmexample.FirestoreContext;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -30,8 +31,10 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import models.Person;
 
 public class AccessFBView {
@@ -47,7 +50,15 @@ public class AccessFBView {
     @FXML
     private Button readButton;
     @FXML
-    private TextArea outputField;
+    private TableView outputField = new TableView<Person>();
+    
+    @FXML
+    private TableColumn nameCol = new TableColumn<Person, String>("Name");
+    @FXML
+    private TableColumn majorCol = new TableColumn<Person, String>("Major");
+    @FXML
+    private TableColumn ageCol = new TableColumn<Person, String>("Age");
+    
     private boolean key;
     private ObservableList<Person> listOfUsers = FXCollections.observableArrayList();
     private Person person;
@@ -103,6 +114,21 @@ public class AccessFBView {
             if (documents.size() > 0) {
                 System.out.println("Outing....");
                 for (QueryDocumentSnapshot document : documents) {
+                    
+                    person = new Person(String.valueOf(document.getData().get("Name")),
+                        document.getData().get("Major").toString(),
+                        Integer.parseInt(document.getData().get("Age").toString()));
+                    listOfUsers.add(person);
+                    
+                    //used to extract values from the objects
+                    nameCol.setCellValueFactory(new PropertyValueFactory<Person, String>("name"));
+                    majorCol.setCellValueFactory(new PropertyValueFactory<Person, String>("major"));
+                    ageCol.setCellValueFactory(new PropertyValueFactory<Person, String>("age"));
+
+                    
+                    outputField.getItems().add(person);
+                    
+                /*
                     outputField.setText(outputField.getText() + document.getData().get("Name") + " , Major: "
                             + document.getData().get("Major") + " , Age: "
                             + document.getData().get("Age") + " \n ");
@@ -111,6 +137,7 @@ public class AccessFBView {
                             document.getData().get("Major").toString(),
                             Integer.parseInt(document.getData().get("Age").toString()));
                     listOfUsers.add(person);
+                */
                 }
             } else {
                 System.out.println("No data");
@@ -157,6 +184,6 @@ public class AccessFBView {
     }
 
     private void clearOutputData() {
-       outputField.clear();
+        outputField.getItems().removeAll(listOfUsers);
     }
 }
