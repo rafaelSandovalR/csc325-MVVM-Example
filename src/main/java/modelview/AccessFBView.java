@@ -30,12 +30,17 @@ import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
+
+import javafx.util.converter.IntegerStringConverter;
 import models.Person;
 
 public class AccessFBView {
@@ -71,9 +76,9 @@ public class AccessFBView {
     public ObservableList<Person> getListOfUsers() {
         return listOfUsers;
     }
+    
 
     void initialize() {
-
         AccessDataViewModel accessDataViewModel = new AccessDataViewModel();
         nameField.textProperty().bindBidirectional(accessDataViewModel.userNameProperty());
         majorField.textProperty().bindBidirectional(accessDataViewModel.userMajorProperty());
@@ -107,8 +112,10 @@ public class AccessFBView {
 
     public boolean readFirebase() {
         clearOutputData();
-        
+        //allows table to be edited
+        outputField.setEditable(true);
         key = false;
+        
 
         //asynchronously retrieve all documents
         ApiFuture<QuerySnapshot> future = App.fstore.collection("References").get();
@@ -130,6 +137,43 @@ public class AccessFBView {
                     majorCol.setCellValueFactory(new PropertyValueFactory<Person, String>("major"));
                     ageCol.setCellValueFactory(new PropertyValueFactory<Person, String>("age"));
 
+                    //to make cells editable
+                    nameCol.setCellFactory(TextFieldTableCell.forTableColumn());
+                    majorCol.setCellFactory(TextFieldTableCell.forTableColumn());
+                    ageCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+                    
+                    nameCol.setOnEditCommit(new EventHandler<CellEditEvent<Person, String>>() {
+                        
+                        @Override
+                        public void handle(CellEditEvent<Person, String> event){
+                            Person person = event.getRowValue();
+                            person.setName(event.getNewValue());
+                            
+                            updateDocument(person, "Name");
+                        }
+                    });
+                    
+                    majorCol.setOnEditCommit(new EventHandler<CellEditEvent<Person, String>>() {
+                        
+                        @Override
+                        public void handle(CellEditEvent<Person, String> event){
+                            Person person = event.getRowValue();
+                            person.setMajor(event.getNewValue());
+                            
+                            updateDocument(person, "Major");
+                        }
+                    });
+                    
+                    ageCol.setOnEditCommit(new EventHandler<CellEditEvent<Person, Integer>>() {
+                        
+                        @Override
+                        public void handle(CellEditEvent<Person, Integer> event){
+                            Person person = event.getRowValue();
+                            person.setAge(event.getNewValue());
+                            
+                            updateDocument(person, "Age");
+                        }
+                    });
                     
                     outputField.getItems().add(person);
                     
@@ -153,6 +197,21 @@ public class AccessFBView {
             ex.printStackTrace();
         }
         return key;
+    }
+    
+    private void updateDocument(Person person, String field){
+        if(field == "Name"){
+            // (async) Update one field
+            ApiFuture<WriteResult> future = App.fstore.collection("References").document(person.getId()).update(field, person.getName());
+        }
+        else if (field == "Major"){
+            // (async) Update one field
+            ApiFuture<WriteResult> future = App.fstore.collection("References").document(person.getId()).update(field, person.getMajor());
+        }
+        else if (field == "Age"){
+            // (async) Update one field
+            ApiFuture<WriteResult> future = App.fstore.collection("References").document(person.getId()).update(field, person.getAge());
+        }
     }
 
     @FXML
@@ -213,4 +272,6 @@ public class AccessFBView {
         ApiFuture<WriteResult> writeResult = App.fstore.collection("References").document(person.getId()).delete();
         
     }
+    
+    
 }
