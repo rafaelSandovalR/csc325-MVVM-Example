@@ -9,15 +9,11 @@ package models;
  * @author MoaathAlrajab
  */
 public class Person {
+    private String id;
     private String name;
     private String major;
     private int age;
 
-    public Person(String name, String major, int age) {
-        this.name = name;
-        this.major = major;
-        this.age = age;
-    }
 
     public String getName() {
         return name;
@@ -25,6 +21,21 @@ public class Person {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Person(String id, String name, String major, int age) {
+        this.id = id;
+        this.name = name;
+        this.major = major;
+        this.age = age;
     }
 
     public String getMajor() {

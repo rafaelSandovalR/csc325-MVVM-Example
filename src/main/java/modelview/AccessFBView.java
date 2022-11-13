@@ -97,6 +97,7 @@ public class AccessFBView {
         DocumentReference docRef = App.fstore.collection("References").document(UUID.randomUUID().toString());
         // Add document data  with id "alovelace" using a hashmap
         Map<String, Object> data = new HashMap<>();
+        
         data.put("Name", nameField.getText());
         data.put("Major", majorField.getText());
         data.put("Age", Integer.parseInt(ageField.getText()));
@@ -119,7 +120,7 @@ public class AccessFBView {
                 System.out.println("Outing....");
                 for (QueryDocumentSnapshot document : documents) {
                     
-                    person = new Person(String.valueOf(document.getData().get("Name")),
+                    person = new Person(document.getId(),String.valueOf(document.getData().get("Name")),
                         document.getData().get("Major").toString(),
                         Integer.parseInt(document.getData().get("Age").toString()));
                     listOfUsers.add(person);
@@ -198,9 +199,18 @@ public class AccessFBView {
         int row = outputField.getSelectionModel().getSelectedIndex();
         
         if(row>= 0){
+            Person p = (Person)outputField.getSelectionModel().getSelectedItem();
             outputField.getItems().remove(row);
             //clears selection of other rows
             outputField.getSelectionModel().clearSelection();
+            
+            deleteFirebase(p);
         }
+    }
+    
+    private void deleteFirebase(Person person){
+        // asynchronously delete a document
+        ApiFuture<WriteResult> writeResult = App.fstore.collection("References").document(person.getId()).delete();
+        
     }
 }
