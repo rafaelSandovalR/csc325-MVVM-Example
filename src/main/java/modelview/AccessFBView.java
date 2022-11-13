@@ -90,6 +90,8 @@ public class AccessFBView {
     }
 
     public boolean readFirebase() {
+        clearOutputData();
+        
         key = false;
 
         //asynchronously retrieve all documents
@@ -152,5 +154,9 @@ public class AccessFBView {
         nameField.clear();
         majorField.clear();
         ageField.clear();
+    }
+
+    private void clearOutputData() {
+       outputField.clear();
     }
 }
