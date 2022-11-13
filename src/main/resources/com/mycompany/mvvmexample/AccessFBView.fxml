@@ -28,14 +28,9 @@
                         <Insets left="10.0" right="20.0" top="10.0" />
                      </HBox.margin>
                   </Button>
-                  <Button alignment="CENTER" mnemonicParsing="false" onAction="#regRecord" text="Register">
+                  <Button fx:id="deleteButton" alignment="CENTER" mnemonicParsing="false" onAction="#deleteRecord" text="Delete" textAlignment="CENTER">
                      <HBox.margin>
                         <Insets left="10.0" right="20.0" top="10.0" />
-                     </HBox.margin>
-                  </Button>
-                  <Button fx:id="switchScene" mnemonicParsing="false" onAction="#switchScene" text="Switch to Web">
-                     <HBox.margin>
-                        <Insets left="100.0" top="10.0" />
                      </HBox.margin>
                   </Button>
                </children>

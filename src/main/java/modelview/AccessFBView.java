@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -49,6 +50,8 @@ public class AccessFBView {
     private Button writeButton;
     @FXML
     private Button readButton;
+    @FXML
+    private Button deleteButton;
     @FXML
     private TableView outputField = new TableView<Person>();
     
@@ -75,6 +78,7 @@ public class AccessFBView {
         nameField.textProperty().bindBidirectional(accessDataViewModel.userNameProperty());
         majorField.textProperty().bindBidirectional(accessDataViewModel.userMajorProperty());
         writeButton.disableProperty().bind(accessDataViewModel.isWritePossibleProperty().not());
+        deleteButton.disableProperty().bind(Bindings.isEmpty(outputField.getSelectionModel().getSelectedItems()));
     }
 
     @FXML
@@ -181,9 +185,22 @@ public class AccessFBView {
         nameField.clear();
         majorField.clear();
         ageField.clear();
+        nameField.requestFocus();
     }
 
     private void clearOutputData() {
         outputField.getItems().removeAll(listOfUsers);
+    }
+    
+    @FXML
+    private void deleteRecord(ActionEvent event){
+        //determine which row is currently selected
+        int row = outputField.getSelectionModel().getSelectedIndex();
+        
+        if(row>= 0){
+            outputField.getItems().remove(row);
+            //clears selection of other rows
+            outputField.getSelectionModel().clearSelection();
+        }
     }
 }
