@@ -59,14 +59,14 @@ public class AccessFBView {
     private Button deleteButton;
     @FXML
     private TableView outputField = new TableView<Person>();
-    
+
     @FXML
     private TableColumn nameCol = new TableColumn<Person, String>("Name");
     @FXML
     private TableColumn majorCol = new TableColumn<Person, String>("Major");
     @FXML
     private TableColumn ageCol = new TableColumn<Person, String>("Age");
-    
+
     private boolean key;
     private ObservableList<Person> listOfUsers = FXCollections.observableArrayList();
     private Person person;
@@ -76,7 +76,6 @@ public class AccessFBView {
     public ObservableList<Person> getListOfUsers() {
         return listOfUsers;
     }
-    
 
     void initialize() {
         AccessDataViewModel accessDataViewModel = new AccessDataViewModel();
@@ -102,7 +101,7 @@ public class AccessFBView {
         DocumentReference docRef = App.fstore.collection("References").document(UUID.randomUUID().toString());
         // Add document data  with id "alovelace" using a hashmap
         Map<String, Object> data = new HashMap<>();
-        
+
         data.put("Name", nameField.getText());
         data.put("Major", majorField.getText());
         data.put("Age", Integer.parseInt(ageField.getText()));
@@ -115,7 +114,6 @@ public class AccessFBView {
         //allows table to be edited
         outputField.setEditable(true);
         key = false;
-        
 
         //asynchronously retrieve all documents
         ApiFuture<QuerySnapshot> future = App.fstore.collection("References").get();
@@ -126,12 +124,12 @@ public class AccessFBView {
             if (documents.size() > 0) {
                 System.out.println("Outing....");
                 for (QueryDocumentSnapshot document : documents) {
-                    
-                    person = new Person(document.getId(),String.valueOf(document.getData().get("Name")),
-                        document.getData().get("Major").toString(),
-                        Integer.parseInt(document.getData().get("Age").toString()));
+
+                    person = new Person(document.getId(), String.valueOf(document.getData().get("Name")),
+                            document.getData().get("Major").toString(),
+                            Integer.parseInt(document.getData().get("Age").toString()));
                     listOfUsers.add(person);
-                    
+
                     //used to extract values from the objects
                     nameCol.setCellValueFactory(new PropertyValueFactory<Person, String>("name"));
                     majorCol.setCellValueFactory(new PropertyValueFactory<Person, String>("major"));
@@ -141,52 +139,43 @@ public class AccessFBView {
                     nameCol.setCellFactory(TextFieldTableCell.forTableColumn());
                     majorCol.setCellFactory(TextFieldTableCell.forTableColumn());
                     ageCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
-                    
+
+                    //handles edits made to each cell
                     nameCol.setOnEditCommit(new EventHandler<CellEditEvent<Person, String>>() {
-                        
+
                         @Override
-                        public void handle(CellEditEvent<Person, String> event){
+                        public void handle(CellEditEvent<Person, String> event) {
                             Person person = event.getRowValue();
                             person.setName(event.getNewValue());
-                            
+
                             updateDocument(person, "Name");
                         }
                     });
-                    
+
                     majorCol.setOnEditCommit(new EventHandler<CellEditEvent<Person, String>>() {
-                        
+
                         @Override
-                        public void handle(CellEditEvent<Person, String> event){
+                        public void handle(CellEditEvent<Person, String> event) {
                             Person person = event.getRowValue();
                             person.setMajor(event.getNewValue());
-                            
+
                             updateDocument(person, "Major");
                         }
                     });
-                    
+
                     ageCol.setOnEditCommit(new EventHandler<CellEditEvent<Person, Integer>>() {
-                        
+
                         @Override
-                        public void handle(CellEditEvent<Person, Integer> event){
+                        public void handle(CellEditEvent<Person, Integer> event) {
                             Person person = event.getRowValue();
                             person.setAge(event.getNewValue());
-                            
+
                             updateDocument(person, "Age");
                         }
                     });
-                    
+
                     outputField.getItems().add(person);
-                    
-                /*
-                    outputField.setText(outputField.getText() + document.getData().get("Name") + " , Major: "
-                            + document.getData().get("Major") + " , Age: "
-                            + document.getData().get("Age") + " \n ");
-                    System.out.println(document.getId() + " => " + document.getData().get("Name"));
-                    person = new Person(String.valueOf(document.getData().get("Name")),
-                            document.getData().get("Major").toString(),
-                            Integer.parseInt(document.getData().get("Age").toString()));
-                    listOfUsers.add(person);
-                */
+
                 }
             } else {
                 System.out.println("No data");
@@ -198,17 +187,15 @@ public class AccessFBView {
         }
         return key;
     }
-    
-    private void updateDocument(Person person, String field){
-        if(field == "Name"){
+
+    private void updateDocument(Person person, String field) {
+        if (field == "Name") {
             // (async) Update one field
             ApiFuture<WriteResult> future = App.fstore.collection("References").document(person.getId()).update(field, person.getName());
-        }
-        else if (field == "Major"){
+        } else if (field == "Major") {
             // (async) Update one field
             ApiFuture<WriteResult> future = App.fstore.collection("References").document(person.getId()).update(field, person.getMajor());
-        }
-        else if (field == "Age"){
+        } else if (field == "Age") {
             // (async) Update one field
             ApiFuture<WriteResult> future = App.fstore.collection("References").document(person.getId()).update(field, person.getAge());
         }
@@ -251,27 +238,27 @@ public class AccessFBView {
     private void clearOutputData() {
         outputField.getItems().removeAll(listOfUsers);
     }
-    
+
     @FXML
-    private void deleteRecord(ActionEvent event){
+    private void deleteRecord(ActionEvent event) {
         //determine which row is currently selected
         int row = outputField.getSelectionModel().getSelectedIndex();
-        
-        if(row>= 0){
-            Person p = (Person)outputField.getSelectionModel().getSelectedItem();
+
+        if (row >= 0) {
+            Person p = (Person) outputField.getSelectionModel().getSelectedItem();
             outputField.getItems().remove(row);
             //clears selection of other rows
             outputField.getSelectionModel().clearSelection();
-            
+
             deleteFirebase(p);
         }
     }
-    
-    private void deleteFirebase(Person person){
+
+    //deletes document for specific person on firestore
+    private void deleteFirebase(Person person) {
         // asynchronously delete a document
         ApiFuture<WriteResult> writeResult = App.fstore.collection("References").document(person.getId()).delete();
-        
+
     }
-    
-    
+
 }
